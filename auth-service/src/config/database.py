@@ -1,28 +1,27 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from sqlalchemy.orm import sessionmaker, Session
 
 from config.settings import DB_URL
+from config.setup_db import create_default_tables
 
-SessionLocal = None
-
-Base = declarative_base()
+SESSION = None
 
 
 def start_db() -> None:
-    global SessionLocal
+    global SESSION
 
     engine = create_engine(DB_URL)
 
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    SESSION = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-    # Create all tables
-    Base.metadata.create_all(engine)
+    with SESSION() as session:
+        create_default_tables(engine, session)
 
 
 def get_session() -> Session:
-    with SessionLocal() as session:
+    with SESSION() as session:
         yield session
 
 
 def get_closed_session() -> Session:
-    return SessionLocal
+    return SESSION

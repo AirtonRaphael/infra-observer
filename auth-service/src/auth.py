@@ -9,8 +9,11 @@ from models import User
 from utils import decode_jwt
 
 
-def get_user_by_id(session: Session, user_id: int):
+def get_users(session: Session):
+    return session.query(User).options(joinedload(User.permission)).all()
 
+
+def get_user_by_id(session: Session, user_id: int):
     return session.query(User).options(joinedload(User.permission)).filter_by(user_id=user_id).first()
 
 
@@ -19,7 +22,6 @@ def get_user_by_email(session: Session, email: str):
 
 
 class JwtBearer(HTTPBearer):
-
     def __init__(self, auto_error: bool = True):
         super(JwtBearer, self).__init__(auto_error=auto_error)
 
@@ -50,7 +52,7 @@ class JwtBearer(HTTPBearer):
             return
 
 
-def admin_permission(payload=Depends(JwtBearer())) -> object:
+def admin_route(payload: dict) -> object:
     if payload.get('role', '') != "Admin":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid permission')
 

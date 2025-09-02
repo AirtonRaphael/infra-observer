@@ -1,12 +1,12 @@
 from typing import List
+
 from fastapi import APIRouter, HTTPException, Depends
 
 from config import settings
 from config.database import get_session
-from schema import LoginSchema, UserSchema
-from auth import get_user_by_email
+from schema import LoginSchema
+import auth
 from utils import create_jwt, verify_password
-from models import User
 
 
 router = APIRouter(
@@ -15,24 +15,19 @@ router = APIRouter(
 )
 
 
-@router.get("/test", response_model=List[UserSchema])
-def test_conn(session=Depends(get_session)):
-    usuarios = session.query(User).all()
-
-    return usuarios
-
-
 @router.post("/login")
 def login(login: LoginSchema, session=Depends(get_session)):
-    db_user = get_user_by_email(session, login.email)
+    db_user = auth.get_user_by_email(session, login.email)
     if not db_user:
         raise HTTPException("User does not exist")
 
     if not verify_password(login.password, db_user.hash_password):
         raise HTTPException(status_code=403, detail="Wrong password!")
 
-    jwt_token = create_jwt(settings.PRIVATE_KEY, 30, db_user.user_id, db_user.permission.permission_type)
-    refresh = create_jwt(settings.PRIVATE_KEY, 30, db_user.user_id, db_user.permission.permission_type)
+    permission = db_user.permission.permission_type.value
+
+    jwt_token = create_jwt(settings.PRIVATE_KEY, 30, db_user.user_id, permission)
+    refresh = create_jwt(settings.PRIVATE_KEY, 30, db_user.user_id, permission)
 
     return {
         'access_token': jwt_token,

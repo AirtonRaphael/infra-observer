@@ -1,15 +1,22 @@
+from enum import Enum
 from pydantic import BaseModel
 
 
+class PermissionEnum(Enum):
+    usuario = "User"
+    admin = "Admin"
+
+
 class LoginSchema(BaseModel):
-    username: str
     email: str
     password: str
 
 
 class UserSchema(BaseModel):
+    user_id: int
     username: str
     email: str
+    permission: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

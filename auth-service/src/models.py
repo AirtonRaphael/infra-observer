@@ -1,27 +1,29 @@
-from sqlalchemy import Enum
+from sqlalchemy import Enum, ForeignKey, select
+from sqlalchemy.orm import mapped_column, Mapped, declarative_base, column_property
 
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import mapped_column, Mapped, relationship, declarative_base
-
-from schema import PermissionEnum
+from schema import RolesEnum
 
 Base = declarative_base()
 
 
-class PermissionsType(Base):
-    __tablename__ = "PermissionType"
+class Roles(Base):
+    __tablename__ = "Roles"
 
-    permission_id: Mapped[int] = mapped_column(primary_key=True)
-    permission_type: Mapped[PermissionEnum] = mapped_column(Enum(PermissionEnum), unique=True, nullable=False)
+    role_id: Mapped[int] = mapped_column(primary_key=True)
+    role: Mapped[RolesEnum] = mapped_column(Enum(RolesEnum), unique=True, nullable=False)
 
 
 class User(Base):
-    __tablename__ = "User"
+    __tablename__ = "Users"
 
     user_id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(nullable=False, unique=True)
     hash_password: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(nullable=False, unique=True)
-    permission_id: Mapped[int] = mapped_column(ForeignKey(PermissionsType.permission_id))
+    role_id: Mapped[int] = mapped_column(ForeignKey(Roles.role_id))
 
-    permission: Mapped[PermissionsType] = relationship(PermissionsType, lazy="joined")
+    role: Mapped[str] = column_property(
+        select(Roles.role)
+        .where(Roles.role_id == role_id)
+        .scalar_subquery()
+    )

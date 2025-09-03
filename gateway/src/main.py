@@ -16,7 +16,7 @@ async def forward_request(service_url: str, path: str, request: Request, user_pa
     headers = dict(request.headers)
     body = await request.body()
 
-    # Injeta dados do usuário autenticado nos headers
+    # Inject user data into the header
     if user_payload:
         headers["x-user-id"] = user_payload.get("sub", "")
         headers["x-user-role"] = user_payload.get("role", "")
@@ -41,13 +41,13 @@ async def forward_request(service_url: str, path: str, request: Request, user_pa
 @router.api_route("/{service}/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def gateway(service: str, path: str, request: Request):
     if service not in services:
-        raise HTTPException(status_code=404, detail=f"Serviço '{service}' não encontrado")
+        raise HTTPException(status_code=404, detail=f"Service '{service}' not founded.")
 
-    # Extrair o token do header Authorization
+    # Extract the Authorization token from the header
     user_payload = None
 
     auth_header = request.headers.get("authorization")
-    if auth_header or auth_header.lower().startswith("bearer "):
+    if auth_header and auth_header.lower().startswith("bearer "):
         token = auth_header.split(" ")[1]
         user_payload = validate_jwt(token)
 

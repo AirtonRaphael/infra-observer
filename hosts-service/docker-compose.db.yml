@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  hosts-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: hosts_db
+      POSTGRES_USER: hosts_user
+      POSTGRES_PASSWORD: hosts_123
+    volumes:
+      - hosts-db-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - hosts-net
+
+volumes:
+  hosts-db-data:
+
+networks:
+  hosts-net:
+    name: hosts-net   # garante que a rede tenha nome fixo
+

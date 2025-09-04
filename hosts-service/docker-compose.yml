@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  auth-service:
+    build: .
+    environment:
+      DB_HOST: hosts-db   # mesmo nome do service no db.yml
+      DB_PORT: 5432
+      DB_NAME: hosts_db
+      DB_USER: hosts_user
+      DB_PASS: secret_auth
+    depends_on:
+      - hosts-db
+    ports:
+      - "8082:8082"
+    networks:
+      - hosts-net
+
+networks:
+  hosts-net:
+    external: true   # usa a rede já criada pelo outro compose
+

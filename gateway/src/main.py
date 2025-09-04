@@ -4,7 +4,8 @@ import httpx
 from auth import validate_jwt
 
 services = {
-        'auth': '127.0.0.1:8081'
+        'auth': '127.0.0.1:8081',
+        'host': '127.0.0.1:8082'
         }
 
 app = FastAPI()
@@ -13,6 +14,7 @@ router = APIRouter()
 
 async def forward_request(service_url: str, path: str, request: Request, user_payload: dict | None = None):
     url = f"http://{service_url}/{path}"
+
     headers = dict(request.headers)
     body = await request.body()
 

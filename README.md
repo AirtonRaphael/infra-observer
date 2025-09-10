@@ -12,9 +12,10 @@ Services communicate through **REST APIs** and can be deployed independently.
 
 ## 🚀 Features
 
-- ⏳ Register and manage monitored endpoints
+
+- Authentication using **JWT**
+- Register and manage monitored endpoints
 - ⏳ Automatic uptime and response time checks
-- ⏳ Authentication using **JWT**
 - ⏳ Notifications via **email** or **WhatsApp**
 - ⏳ Occurrence logging system
 - ⏳ CLI for interacting with the API

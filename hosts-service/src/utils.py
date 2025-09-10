@@ -1,12 +1,25 @@
 import re
 from urllib.parse import urlparse
 
+from fastapi import HTTPException, status
+
 import requests
 
 DOMAIN_OR_IP_REGEX = re.compile(
     r"^((?:(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})|"
     r"(?:\d{1,3}\.){3}\d{1,3})$"
 )
+
+
+def validate_host(new_url: str):
+    url = validate_url(new_url.url)
+    if not url:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="URL is not in a valid format.")
+
+    if not endpoint_exists(url):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to connect to the URL.")
+
+    return url
 
 
 def validate_url(url: str):

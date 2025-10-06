@@ -1,17 +1,19 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from models import Host
 from schema import HostBase, HostSchema, HostCreateSchema
 from utils import validate_url
 from config.database import get_session
+from custom_queue import get_queue, RabbitMQ
 
 router = APIRouter()
 
 
 @router.post('/', response_model=HostSchema)
-async def add_host(new_host: HostCreateSchema, session: Session = Depends(get_session)):
+async def add_host(new_host: HostCreateSchema, session: Session = Depends(get_session), queue: RabbitMQ = Depends(get_queue)):
     host = get_host_op(session, label=new_host.label)
     if host:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Host already exists.")
@@ -22,6 +24,8 @@ async def add_host(new_host: HostCreateSchema, session: Session = Depends(get_se
     session.add(host)
     session.commit()
     session.refresh(host)
+
+    queue.publish("host.add", new_host.model_dump_json())
 
     return host
 

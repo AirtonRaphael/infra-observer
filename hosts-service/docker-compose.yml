@@ -1,7 +1,6 @@
-version: '3.9'
 
 services:
-  auth-service:
+  host-service:
     build: .
     environment:
       DB_HOST: hosts-db   # mesmo nome do service no db.yml

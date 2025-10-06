@@ -18,6 +18,10 @@ async def add_host(new_host: HostCreateSchema, session: Session = Depends(get_se
     if host:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Host already exists.")
 
+    url = session.query(Host).filter_by(url=new_host.url).first()
+    if url:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Url already exists.")
+
     url = validate_url(new_host.url)
     host = Host(label=new_host.label, url=url)
 
